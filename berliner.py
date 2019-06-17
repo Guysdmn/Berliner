@@ -24,27 +24,27 @@ def solve(fin,fout):
     
     try:
         print('-----------------------START----------------------------')
-        df   = pd.read_csv(fin)
-        disf = pd.DataFrame(pd.read_csv(distance_mat))
-        disf = disf.drop(disf.columns[[0]], axis=1)
-        fd   = disf.values.copy()
+        # df   = pd.read_csv(fin)
+        # disf = pd.DataFrame(pd.read_csv(distance_mat))
+        # disf = disf.drop(disf.columns[[0]], axis=1)
+        # fd   = disf.values.copy()
     
         # initialize solvers
         #GA_solver   = gasolver.GA_solver(fin=fout,leads=len(fd))
         OR_solver   = orsolver.OR_solver(distance_matrix=distance_mat)
         #OR_solvertw = orsolvertw.OR_solver_TW(fin=fout)
-        ACO_solver  = acosolver.ACO_solver(Graph=fd,seed=345)
+        # ACO_solver  = acosolver.ACO_solver(Graph=fd,seed=345)
 
         # solve
         start = time.time()
         or_perm = OR_solver.run()
         end = time.time()
         print("OR solver timer: {:.2f}".format((end-start)/60), "minutes")
-        start = time.time()
-        aco_perm = ACO_solver.run()
-        end = time.time()
-        print("\nACO solver solution:\nObjective: {:.2f}".format(aco_perm[1]), "minutes")
-        print("ACO solver timer: {:.2f}".format((end-start)/60), "minutes")
+        # start = time.time()
+        # aco_perm = ACO_solver.run()
+        # end = time.time()
+        # print("\nACO solver solution:\nObjective: {:.2f}".format(aco_perm[1]), "minutes")
+        # print("ACO solver timer: {:.2f}".format((end-start)/60), "minutes")
         
         print('-----------------------FINNISH---------------------------')
     except:
