@@ -1,0 +1,10 @@
+name,owners,types,opening_hours_tuesday,rating,website,disqualification_reason,phone_number,email,is_qualifed,latitude,longitude,place_id
+Anton Döner,,"[""restaurant""]",9:00 AM – 12:00 AM,5 (rated 3 times),,unsupported_place_type,15774441111,,FALSE,52.52729,13.47235,f94934eb-01f7-42fb-846b-168e7ac2fa3a
+Cafe-Snack-banhmyvietnam,,"[""cafe""]",Closed,5 (rated 1 times),,,,,TRUE,52.52668,13.4907,14c828ad-786c-49e7-8577-ee22a153e0ad
+Cafe Pinut Berlin,Thomas Steigüber,"[""cafe""]",10:00 AM – 6:00 PM,5 (rated 2 times),https://www.cafepinut.de/,,3098353951,info@cafepinut.de,TRUE,52.51461,13.49081,82e089c0-b9fe-4c2f-a13d-af70888d52e0
+Gode Wind - Hauptstadtkogge,Oliver Reetz,"[""restaurant""]",Closed,4.6 (rated 116 times),http://www.godewind-berlin.de/,,17621738222,info@godewind-berlin.de?subject=Mein%20Anliegen,TRUE,52.49194,13.48561,4b69ea69-26d0-4c54-897b-c0134baa3c44
+AP Gastro Connection GmbH,,"[""restaurant"", """"]",,5 (rated 1 times),,,,,TRUE,52.50285,13.48008,91041409-3719-467e-b9a9-f7694d2661d3
+Ristorante Il Bufalo,A. Khalil,"[""restaurant"", ""bar""]",11:30 AM – 11:30 PM,4.1 (rated 226 times),https://www.il-bufalo-berlin.de/,,3052679700,,TRUE,52.501,13.49743,79c47e8b-0ca2-4ee8-a734-9bb48f2c5e35
+Steineckes Heidebrot bakery GmbH & Co. KG,Katrin Steinecke,"[""bakery"", ""store""]",6:00 AM – 7:00 PM,3.7 (rated 37 times),https://steinecke.info/,,3050378199,,TRUE,52.48257,13.52507,f97b4941-79dd-4ff0-87a1-1c62505d776d
+Mendoza Steakhaus Am Tierpark,,"[""restaurant""]",11:00 AM – 11:30 PM,3.8 (rated 94 times),http://www.mendoza-steakhaus-am-tierpark.de/,,3032669320,mendoza-berlin@web.de,TRUE,52.49739,13.52117,661bc50f-11a9-4397-8e57-b832a75acb17
+Sturgis,,"[""bar""]",4:00 – 9:30 PM,4.7 (rated 52 times),,,,,TRUE,52.50753,13.49954,e76adb7e-5590-4147-937d-1965de201f2f
