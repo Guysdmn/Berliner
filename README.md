@@ -8,4 +8,5 @@ run example: python3 berliner.py csv/licht.csv csv/solution.csv
 
 for example api_key.txt is not needed, distance_matrix set to random...
 
+# Warning
 *** wrong use will cost you A LOT of money ***
