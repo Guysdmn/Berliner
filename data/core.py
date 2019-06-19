@@ -85,7 +85,7 @@ def distance_builder(fin,fout):
         print("Saved to: ",fout)
         print("-----------------------------------------------------------------------")
     except:
-        raise
+        raise IOError
 
 """ csv_export function
 gets leads data from fin.csv, puts in fout.csv in order.
@@ -101,7 +101,10 @@ def pairwise(iterable):
 
 def csv_export(fin,order,fout):
     # Read original .csv file.
-    df = pd.read_csv(fin)
+    try:
+        df = pd.read_csv(fin)
+    except:
+        raise IOError
     # Create new data frame.
     orderd = pd.DataFrame(columns=['name', 'owners', 'types','opening_hours_tuesday','rating','disqualification_reason',
                                    'phone_number','email','is_qualifed','latitude','longitude','place_id'])
@@ -135,6 +138,8 @@ def random_distance_builder(fout, nxn=100, min_value=1, max_value=100):
         df = pd.DataFrame(np.random.randint(min_value,max_value,size=(nxn, nxn)),columns=names,index=names)
         # Fill diagonal with 0 value.
         pd_fill_diagonal(df,0)
+        # Check "geo distance" like.
+        df = df.apply(lambda x: [y if y <= 80 else (max_value*2) for y in x])
         # Save to fout.csv file.
         df.to_csv(fout)
     except:

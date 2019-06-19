@@ -1,10 +1,11 @@
-,Anton Döner,Cafe-Snack-banhmyvietnam,Cafe Pinut Berlin,Gode Wind - Hauptstadtkogge,AP Gastro Connection GmbH,Ristorante Il Bufalo,Steineckes Heidebrot bakery GmbH & Co. KG,Mendoza Steakhaus Am Tierpark,Sturgis
-Anton Döner,0,16,31,9,45,57,9,9,49
-Cafe-Snack-banhmyvietnam,16,0,26,9,43,50,9,9,39
-Cafe Pinut Berlin,31,26,0,46,25,30,9,44,19
-Gode Wind - Hauptstadtkogge,9,9,46,0,23,30,44,52,38
-AP Gastro Connection GmbH,45,43,25,23,0,16,9,38,21
-Ristorante Il Bufalo,57,50,30,30,16,0,39,24,10
-Steineckes Heidebrot bakery GmbH & Co. KG,9,9,9,44,9,39,0,26,50
-Mendoza Steakhaus Am Tierpark,9,9,44,52,38,24,26,0,29
-Sturgis,49,39,19,38,21,10,50,29,0
+,s1,s2,s3,s4,s5,s6,s7,s8,s9,s10
+s1,0,16,65,48,49,45,200,200,30,21
+s2,46,0,50,200,200,49,56,54,49,76
+s3,23,51,0,56,23,200,48,48,200,72
+s4,21,20,70,0,19,43,38,19,22,76
+s5,50,34,200,8,0,43,32,59,21,51
+s6,74,35,80,200,27,0,50,29,37,52
+s7,200,200,200,5,24,200,0,37,73,200
+s8,39,31,15,19,200,39,31,0,200,12
+s9,11,200,24,57,28,43,14,200,0,64
+s10,18,26,43,200,37,68,57,21,48,0
