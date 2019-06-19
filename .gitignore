@@ -3,3 +3,4 @@
 .DS_Store
 data/api_key.txt
 csv/distance_matrix.csv
+berliner.code-workspace
