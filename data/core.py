@@ -57,8 +57,8 @@ def distance_builder(fin,fout):
                 # Check geo distance, if greater then maxDistance append max distance and skip.
                 maxDistance = 3500
                 if(distance.distance(origin, destination).m > maxDistance):
-                    disMat[row1['name']][row2['name']] = 10^3
-                    disMat[row2['name']][row1['name']] = 10^3
+                    disMat[row1['name']][row2['name']] = 10^4
+                    disMat[row2['name']][row1['name']] = 10^4
                     continue
                 
                 # Pass origin and destination variables to distance_matrix googlemaps function.
