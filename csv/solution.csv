@@ -1,11 +1,11 @@
 name,owners,types,opening_hours_tuesday,rating,disqualification_reason,phone_number,email,is_qualifed,latitude,longitude,place_id
 Fedora - Russischer Imbiss,,['restaurant'],8:00 AM – 9:00 PM,4.9 (rated 22 times),,,,True,52.513909999999996,13.47551,03c3ffb0-f1f6-4c31-82be-8d42bf11418d
-Buffet der Saison,Alexander Otto,['restaurant'],10:00 AM – 9:00 PM,3.8 (rated 35 times),,3055397457.0,info@ring-center.de,True,52.51416999999999,13.47674,a123df51-13b0-4c90-92bb-56bd8232a969
-RIO2,,['bar'],Open 24 hours,4.3 (rated 4 times),,,,True,52.510380000000005,13.51551,1fa9e064-43b2-4743-8de3-6475d30276d7
-Mama Maria's,,['restaurant'],,5 (rated 1 times),,,,True,52.51331999999999,13.479339999999999,3aa5bf2b-3802-4db6-8c19-1c243034c673
 Café Robiniengrund,,['cafe'],10:00 AM – 5:00 PM,4 (rated 4 times),,1782407929.0,,True,52.52865,13.5163,69e10012-2f81-4237-9af2-d5b17da72ef4
-McDonald's,,"['restaurant', 'cafe']",7:00 AM – 1:00 AM,2.9 (rated 1193 times),chain,3051097093.0,,False,52.50994,13.53151,5b1e2f93-d7bc-40a9-ab84-83b07a0a22ec
-Steineckes Heidebrot,Katrin Steinecke,"['bakery', 'store']",8:00 AM – 10:00 PM,3.8 (rated 20 times),chain,3055009930.0,,False,52.514309999999995,13.477329999999998,22c75a43-4660-4e84-be6e-01ba0c924a45
 International Imbiss,,['restaurant'],,,,,,True,52.51104,13.529679999999999,20c5ecae-9439-4ee2-918a-1bfc0537af52
+Mama Maria's,,['restaurant'],,5 (rated 1 times),,,,True,52.51331999999999,13.479339999999999,3aa5bf2b-3802-4db6-8c19-1c243034c673
+RIO2,,['bar'],Open 24 hours,4.3 (rated 4 times),,,,True,52.510380000000005,13.51551,1fa9e064-43b2-4743-8de3-6475d30276d7
+Steineckes Heidebrot,Katrin Steinecke,"['bakery', 'store']",8:00 AM – 10:00 PM,3.8 (rated 20 times),chain,3055009930.0,,False,52.514309999999995,13.477329999999998,22c75a43-4660-4e84-be6e-01ba0c924a45
 Elterncafé Vitale Großstadtmäuse,Inhaltlich Verantwortlicher gemäß § & IBP Privatinstitut für Bewusstseins & Nicole Hausmann,"['cafe', 'store']",Closed,3.6 (rated 7 times),,1723082200.0,,True,52.50166,13.502770000000002,af874095-ddd0-4a5b-8dc7-34dccc05a0e5
+Buffet der Saison,Alexander Otto,['restaurant'],10:00 AM – 9:00 PM,3.8 (rated 35 times),,3055397457.0,info@ring-center.de,True,52.51416999999999,13.47674,a123df51-13b0-4c90-92bb-56bd8232a969
+McDonald's,,"['restaurant', 'cafe']",7:00 AM – 1:00 AM,2.9 (rated 1193 times),chain,3051097093.0,,False,52.50994,13.53151,5b1e2f93-d7bc-40a9-ab84-83b07a0a22ec
 Shop der Brezelbäckerei Ditsch GmbH,,"['bakery', 'store']",5:00 AM – 8:00 PM,3.9 (rated 35 times),chain,3033024796.0,,False,52.51385,13.47548,3e62ad33-17bd-4780-975c-dad6a1ac5323

@@ -85,7 +85,7 @@ def distance_builder(fin,fout,mode):
         print("Saved to: ",fout)
         print("-----------------------------------------------------------------------")
     except:
-        raise IOError
+        raise
 
 """ csv_export function
 gets leads data from fin.csv, puts in fout.csv in order.

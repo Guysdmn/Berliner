@@ -1,5 +1,4 @@
 import sys
-# sys.path += ['csv']
 import numpy as np
 import pandas as pd
 import time
@@ -7,7 +6,7 @@ import time
 from solver import orsolver, acosolver, orsolvertw
 from data import core
 
-def solve(fin,fout,mode='Walking'):
+def solve(fin,fout,mode='walking'):
     try:
         input_file = open(fin,'r')
         input_file.close()
