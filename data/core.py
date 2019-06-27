@@ -14,7 +14,7 @@ params:
 fin = input .csv leads file.
 fout = output .csv distance matrix file.
 """
-def distance_builder(fin,fout):
+def distance_builder(fin,fout,mode):
     # Data frame init with required columns.
     df = pd.read_csv(fin,usecols = ['name','latitude','longitude'])
 
@@ -62,7 +62,7 @@ def distance_builder(fin,fout):
                     continue
                 
                 # Pass origin and destination variables to distance_matrix googlemaps function.
-                result = Gmaps.distance_matrix(origin, destination, mode='walking')
+                result = Gmaps.distance_matrix(origin, destination, mode=mode)
                 apiCalls += 1
 
                 # Create resault distance(meters), duration(minuts).
@@ -104,16 +104,19 @@ def csv_export(fin,order,fout):
     try:
         df = pd.read_csv(fin)
     except:
+        print("error reading",fin)
         raise IOError
     # Create new data frame.
     orderd = pd.DataFrame(columns=['name', 'owners', 'types','opening_hours_tuesday','rating','disqualification_reason',
                                    'phone_number','email','is_qualifed','latitude','longitude','place_id'])
+
     # Append to new data frame in order.
     for idx in order:
         orderd = orderd.append(df.iloc[idx])
 
     # Save ordered to *.csv file.
     orderd.to_csv(fout, index=False)
+    print("Solution saved to: {}".format(fout))
 
 
 """ random_distance_builder

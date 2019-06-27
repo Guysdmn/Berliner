@@ -33,7 +33,7 @@ class OR_solver(object):
             previous_index = index
             index = assignment.Value(routing.NextVar(index))
             route_distance += routing.GetArcCostForVehicle(previous_index, index, 0)
-        plan_output += ' {}\n'.format(manager.IndexToNode(index))
+        plan_output += ' {}'.format(manager.IndexToNode(index))
         print(plan_output)
         plan_output += 'Route duration: {}minutes\n'.format(route_distance)
 

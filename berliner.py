@@ -1,13 +1,13 @@
 import sys
-sys.path += ['data','solver','csv']
+# sys.path += ['csv']
 import numpy as np
 import pandas as pd
 import time
 
-from solver import orsolver, acosolver #, orsolvertw, gasolver
-import core
+from solver import orsolver, acosolver, orsolvertw
+from data import core
 
-def solve(fin,fout):
+def solve(fin,fout,mode='Walking'):
     try:
         input_file = open(fin,'r')
         input_file.close()
@@ -19,7 +19,7 @@ def solve(fin,fout):
 
     # build distance matrix
     try:
-        #core.distance_builder(fin,distance_mat)
+        #core.distance_builder(fin=fin,fout=distance_mat,mode=mode)
         core.random_distance_builder(fout=distance_mat,nxn=10,min_value=5,max_value=100)
     except IOError:
         print("ERROR: data/api_key.txt not found")
@@ -35,22 +35,19 @@ def solve(fin,fout):
         fd   = disf.values.copy()
         
         # initialize solvers
-        #GA_solver   = gasolver.GA_solver(fin=fout,leads=len(fd))
         OR_solver   = orsolver.OR_solver(distance_matrix=distance_mat)
         #OR_solvertw = orsolvertw.OR_solver_TW(fin=fout)
         ACO_solver  = acosolver.ACO_solver(Graph=fd,seed=345)
 
         # solve
-        # OR_tools
         start = time.time()
-        or_perm = OR_solver.run()
+        or_perm = OR_solver.run()   # OR_tools
         end = time.time()
         print("OR solver timer: {:.2f}".format((end-start)/60), "minutes")
-        # ACO
+        print('---------------------------------------------------------')
         start = time.time()
-        aco_perm = ACO_solver.run()
+        aco_perm = ACO_solver.run() # ACO
         end = time.time()
-        print("\nACO solver solution:\nObjective: {:.2f}".format(aco_perm[1]), "minutes")
         print("ACO solver timer: {:.2f}".format((end-start)/60), "minutes")
 
         print('-----------------------FINNISH---------------------------')
@@ -68,7 +65,7 @@ def solve(fin,fout):
     
 
 if __name__ == "__main__":
-    # berliner.solve(fin.csv, fout.csv)
+    # berliner.solve(fin=fin.csv, fout=fout.csv, mode='walking')
     
     fin  = sys.argv[1] #'csv/*.csv'
     fout = sys.argv[2] #'csv/distance_matrix*.csv'

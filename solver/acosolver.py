@@ -1,5 +1,4 @@
 import numpy as np
-import targetFunction as tfunc
 import sys
 from collections import OrderedDict
 
@@ -53,7 +52,26 @@ class ACO_solver(object) :
                 break           
             self.pheromone * self.rho  #evaporation
         
+        # print solution
+        self.print_solution(best_path)
+
         return best_path
+
+    """
+    Prints solution on console.
+    """
+    def print_solution(self, best_path):
+        best_perm = best_path[0]
+        best_time = best_path[1]
+
+        print('ACO solver solution:')
+        print('Objective: {} minutes'.format(best_time))
+        plan_output = 'Route for agent 0:\n'
+        for idx in best_perm:
+            plan_output += ' {} ->'.format(idx[0])
+        plan_output += ' {}'.format(best_perm[0][0])
+        print(plan_output)
+
 
     """
     This method deposits pheromones on the edges.
