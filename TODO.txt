@@ -1,0 +1,5 @@
+
+
+2) calculate best route perm.
+
+3) add index in perm to new column.

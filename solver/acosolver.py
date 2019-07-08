@@ -43,7 +43,6 @@ class ACO_solver(object) :
             all_paths = self.constructColonyPaths()
             self.depositPheronomes(all_paths)
             shortest_path = min(all_paths, key=lambda x: x[1])
-            #print(i+1, ": ", shortest_path[1])
             if shortest_path[1] < best_path[1]:
                 best_path = shortest_path 
                 stop = 0
@@ -53,7 +52,7 @@ class ACO_solver(object) :
             self.pheromone * self.rho  #evaporation
         
         # print solution
-        self.print_solution(best_path)
+        # self.print_solution(best_path)
 
         return best_path
 
@@ -111,7 +110,7 @@ class ACO_solver(object) :
             path.append((prev, move))
             prev = move
             visited.add(move)
-        path.append((prev, start)) # completing the tour   
+        path.append((prev, start))   
         return path
     """
     This method generates 'Nant' paths, for the entire colony, representing a single iteration.
@@ -133,7 +132,6 @@ class ACO_solver(object) :
     The random generation relies on norm_row, as a vector of probabilities, using the numpy function 'choice'
     """
     def nextMove(self, pheromone, dist, visited) :
-        #print(dist)
         pheromone = np.copy(pheromone)
         pheromone[list(visited)] = 0
         row = pheromone ** self.alpha * (( 1.0 / dist) ** self.beta)

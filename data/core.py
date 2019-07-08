@@ -5,46 +5,183 @@ import googlemaps
 from geopy import distance
 import time
 from itertools import islice, tee
+import logging
 
-""" distance_builder function
-reads relevant columns ['name','latitude','longitude'] from fin.csv file 
-and building distance matrix using google distance matrix API, save matrix as fout.csv
-builder function should be call only ones for leads.csv file (Google API $$$...)
+logger = logging.getLogger('root')
+
+from solver import orsolver, acosolver, orsolvertw
+
+
+"""solve function
+
+"""
+def solve(disMatName,solver='or'):
+    # initialize solver by solver arg.
+    if(solver=='or'):
+        #
+        OR_solver = orsolver.OR_solver(distance_matrix=disMatName)
+        #
+        start = time.time()
+        perm  = OR_solver.run()   # OR_tools
+    elif(solver=='ortw'):
+        #
+        OR_solvertw = orsolvertw.OR_solver_TW(fin=fout)
+        #
+        start = time.time()
+        perm  = OR_solvertw.run()   # OR_tools time windows
+    elif (solver=='aco'):
+        #
+        disf = pd.DataFrame(pd.read_csv(disMatName))
+        disf = disf.drop(disf.columns[[0]], axis=1)
+        fd   = disf.values.copy()
+        #
+        ACO_solver  = acosolver.ACO_solver(Graph=fd,seed=345)
+        #
+        start = time.time()
+        perm  = ACO_solver.run() # ACO
+    else:
+        raise
+    
+    return start, perm
+
+"""group_solver function
+
+"""
+def group_solver(df,groupBy,mode,disMat,builder,solver):
+    try:
+        # split data by groupBy into dictionary, key = groupBy column.
+        df = df.sort_values(by=[groupBy], ascending=True, na_position='first').dropna() # maybe unnessesery
+        
+        uniqueNames = df[groupBy].unique()
+        logger.info("Total of {} different {}".format(len(uniqueNames),groupBy))
+        dfDict = {value : pd.DataFrame for value in uniqueNames}
+        for key in dfDict.keys():
+            dfDict[key] = df[:][df[groupBy] == key]
+
+        # build distance matrix for each group.
+        # solve tsp for each group.
+        for group, data in dfDict.items():
+            logger.info('----------------------STARTING GROUP {}----------------------'.format(group))
+            distance_mat = 'csv/{}_distance.csv'.format(group)
+            n = data.shape[0]
+            solution = (list(range(n)), 0)
+
+            # build distance matrix for group if disMat=True
+            if disMat:
+                if builder == 'google':
+                    google_distance_builder(data=data,fout=distance_mat,mode=mode)
+                elif builder == 'geo':
+                    geo_distance_builder(data=data,fout=distance_mat)
+                else:
+                    random_distance_builder(fout=distance_mat,nxn=n,min_value=5,max_value=100)
+
+            # find solution only for groups bigger then 2
+            if(n > 2):
+                logger.info("Searching for optimal route...")
+                start,solution = solve(distance_mat,solver)
+                end = time.time()
+
+                logger.info("{}.csv number of leads in {}: {}".format(group,groupBy,n))
+                logger.info("Order of {}:{}".format(mode,solution[0]))
+                logger.info("Objective: {}".format(solution[1]))
+                logger.info("{} solver timer: {:.2f} minutes".format(solver.upper(),(end-start)/60))
+            else:
+                logger.info("Group contains less then three points...")
+
+            fname = 'csv/{}_solution.csv'.format(group)
+            csv_export(data=data,order=solution[0],fout=fname)
+
+        return start,solution
+    except:
+        logger.error("Group solver failed")
+        raise
+
+
+"""defult_solver function
+
+"""
+def defult_solver(fin,fout,mode='walking'):
+    distance_mat = 'csv/distance_matrix.csv'
+
+    # build distance matrix
+    try:
+        #google_distance_builder(data=data,fout=distance_mat,mode=mode)
+        geo_distance_builder(data=data,fout=distance_mat)
+        # random_distance_builder(fout=distance_mat,nxn=n,min_value=5,max_value=100)
+    except:
+        raise
+    
+    try:
+        logger.info('-----------------------START----------------------------')
+        disf = pd.DataFrame(pd.read_csv(distance_mat))
+        disf = disf.drop(disf.columns[[0]], axis=1)
+        fd   = disf.values.copy()
+        
+        # initialize solvers
+        # OR_solver   = orsolver.OR_solver(distance_matrix=distance_mat)
+        # #OR_solvertw = orsolvertw.OR_solver_TW(fin=fout)
+        # ACO_solver  = acosolver.ACO_solver(Graph=fd,seed=345)
+
+        # # solve
+        # start = time.time()
+        # or_perm = OR_solver.run()   # OR_tools
+        # end = time.time()
+        # print("OR solver timer: {:.2f}".format((end-start)/60), "minutes")
+        # print('---------------------------------------------------------')
+        # start = time.time()
+        # aco_perm = ACO_solver.run() # ACO
+        # end = time.time()
+        # print("ACO solver timer: {:.2f}".format((end-start)/60), "minutes")
+
+        # print('-----------------------FINNISH---------------------------')
+    except:
+        raise
+    try:
+        core.csv_export(fin=fin,order=or_perm,fout=fout)
+    except:
+        raise
+
+
+""" google_distance_builder function
+building distance matrix using google distance matrix API, save matrix as fout.csv
+builder function should be call only ones for *.csv file (Google API $$$...)
+*** Google API key requiered ***
 params: 
-fin = input .csv leads file.
+data = input data frame.
 fout = output .csv distance matrix file.
 """
-def distance_builder(fin,fout,mode):
-    # Data frame init with required columns.
-    df = pd.read_csv(fin,usecols = ['name','latitude','longitude'])
+def google_distance_builder(data,fout,mode):
 
+    logger.critical("Using google key for distance matrix")
     # Google Maps API web service.
     try:
         with open('data/api_key.txt', mode='r') as f:
             API_key = f.readline().strip()
+            logger.info("Google API_KEY successfully connected")
     except:
-        raise IOError
+        logger.error("Google API_KEY failed")
+        raise
 
     try:
         # Connect to googlemaps.
         Gmaps = googlemaps.Client(key=API_key)
 
         # Init distance matrix - will be used to store calculated distances and times.
-        disMat   = pd.DataFrame(0,columns=df.name.unique(), index=df.name.unique())
+        disMat   = pd.DataFrame(0,columns=data.name.unique(), index=data.name.unique())
         apiCalls = 0
 
         # Start building timer.
         start = time.time()
 
         # Loop through each row in the data frame.
-        for (i1, row1) in df.iterrows():
+        for (i1, row1) in data.iterrows():
             # Assign latitude and longitude as origin points.
             LatOrigin  = row1['latitude']
             LongOrigin = row1['longitude']
             origin     = (LatOrigin,LongOrigin)
 
             # Loop through unvisited paths in the data frame (decrease API calls $$$).
-            for (i2, row2) in islice(df.iterrows(),i1):
+            for (i2, row2) in islice(data.iterrows(),i1):
                 # Assign latitude and longitude as destination points.
                 LatDest     = row2['latitude']
                 LongDest    = row2['longitude']
@@ -80,43 +217,83 @@ def distance_builder(fin,fout,mode):
         disMat.to_csv(fout)
 
         # Print stats
-        print("-----------------------------------------------------------------------")
-        print("Built distane matrix in: {:.2f}".format((end-start)/60) , "minutes with {}".format(apiCalls), "Google API calls")
-        print("Saved to: ",fout)
-        print("-----------------------------------------------------------------------")
+        logger.info("-----------------------------------------------------------------------")
+        logger.info("Built distane matrix in: {:.2f} minutes with {} Google API calls".format((end-start)/60,apiCalls))
+        logger.info("Distance saved to: {}".format(fout))
+        logger.info("-----------------------------------------------------------------------")
     except:
+        logger.error("Google distance matrix failed")
         raise
 
-""" csv_export function
-gets leads data from fin.csv, puts in fout.csv in order.
+
+""" geo_distance_builder for dev mode
+build  distance matrix using geopy distance calculator, save matrix as fout.csv
+distance calculator 
+              model             major (km)   minor (km)     flattening
+ELLIPSOIDS = {'WGS-84':        (6378.137,    6356.7523142,  1 / 298.257223563),
+              'GRS-80':        (6378.137,    6356.7523141,  1 / 298.257222101),
+              'Airy (1830)':   (6377.563396, 6356.256909,   1 / 299.3249646),
+              'Intl 1924':     (6378.388,    6356.911946,   1 / 297.0),
+              'Clarke (1880)': (6378.249145, 6356.51486955, 1 / 293.465),
+              'GRS-67':        (6378.1600,   6356.774719,   1 / 298.25),
+              }
+WGS-84 ellipsoid model by default, which is the most globally accurate.
+see : https://geopy.readthedocs.io/en/stable/#module-geopy.distance
 params:
-fin   = input .csv file name, unordered. 
-order = new order permutation.
-fout  = output .csv file name, ordered by perm order. 
+data = input data frame.
+fout = output .csv distance matrix file.
 """
-def pairwise(iterable):
-    a, b = tee(iterable)
-    next(b, None)
-    return zip(a, b)
+def geo_distance_builder(data,fout):
+    try: 
+        logger.info("Building geographical distance matrix...")   
+        # Init distance matrix - will be used to store calculated distances.
+        disMat = pd.DataFrame(0,columns=data.name.unique(), index=data.name.unique())
 
-def csv_export(fin,order,fout):
-    # Read original .csv file.
-    try:
-        df = pd.read_csv(fin)
+        # Start building timer.
+        start = time.time()
+
+        # Loop through each row in the data frame.
+        for (i1, row1) in data.iterrows():
+            # Assign latitude and longitude as origin points.
+            LatOrigin  = row1['latitude']
+            LongOrigin = row1['longitude']
+            origin     = (LatOrigin,LongOrigin)
+
+            # Loop through unvisited paths in the data frame (decrease API calls $$$).
+            for (i2, row2) in islice(data.iterrows(),i1):
+                # Assign latitude and longitude as destination points.
+                LatDest     = row2['latitude']
+                LongDest    = row2['longitude']
+                destination = (LatDest,LongDest)
+
+                # Skip condition, matrix diagonal.
+                if(origin == destination):
+                    continue
+                
+                # Get geo distance
+                value = distance.distance(origin, destination).m
+                # logger.info(value)
+                maxDistance = 3500
+                if(value > maxDistance):
+                    disMat[row1['name']][row2['name']] = 10^4
+                    disMat[row2['name']][row1['name']] = 10^4
+                    continue
+
+                disMat[row1['name']][row2['name']] = value
+                disMat[row2['name']][row1['name']] = value
+
+        # Stop building timer
+        end = time.time()
+
+        # Save as .csv file
+        disMat.to_csv(fout)
+
+        # Print stats
+        logger.info("Built distane matrix in: {:.2f} minutes with geo_distance_builder".format((end-start)/60))
+        logger.info("Distance saved to: {}".format(fout))
     except:
-        print("error reading",fin)
-        raise IOError
-    # Create new data frame.
-    orderd = pd.DataFrame(columns=['name', 'owners', 'types','opening_hours_tuesday','rating','disqualification_reason',
-                                   'phone_number','email','is_qualifed','latitude','longitude','place_id'])
-
-    # Append to new data frame in order.
-    for idx in order:
-        orderd = orderd.append(df.iloc[idx])
-
-    # Save ordered to *.csv file.
-    orderd.to_csv(fout, index=False)
-    print("Solution saved to: {}".format(fout))
+        logger.error("Geo distance matrix failed")
+        raise
 
 
 """ random_distance_builder
@@ -133,7 +310,7 @@ def pd_fill_diagonal(df_matrix, value=0):
     mat[range(n), range(n)] = value
     return pd.DataFrame(mat)
 
-def random_distance_builder(fout, nxn=100, min_value=1, max_value=100):
+def random_distance_builder(fout, nxn, min_value=1, max_value=100):
     try:
         # Create leads name.
         names = ['s' + str(x) for x in range(1,nxn+1)]
@@ -142,8 +319,37 @@ def random_distance_builder(fout, nxn=100, min_value=1, max_value=100):
         # Fill diagonal with 0 value.
         pd_fill_diagonal(df,0)
         # Check "geo distance" like.
-        df = df.apply(lambda x: [y if y <= 80 else (max_value*2) for y in x])
+        df = df.apply(lambda x: [y if y <= 80 else (max_value*max_value) for y in x])
         # Save to fout.csv file.
         df.to_csv(fout)
     except:
+        logger.error("Random distance matrix failed")
+        raise
+
+""" csv_export function
+gets leads data from fin.csv, puts in fout.csv in order.
+params:
+fin   = input .csv file name, unordered. 
+order = new order permutation.
+fout  = output .csv file name, ordered by order arg. 
+"""
+def pairwise(iterable):
+    a, b = tee(iterable)
+    next(b, None)
+    return zip(a, b)
+
+def csv_export(data,order,fout):
+    try:
+        # Create new data frame.
+        orderd = pd.DataFrame(columns=list(data.columns))
+
+        # Append to new data frame in order.
+        for idx in order:
+            orderd = orderd.append(data.iloc[idx])
+
+        # Save ordered to *.csv file.
+        orderd.to_csv(fout, index=False)
+        logger.info("Solution saved to: {}".format(fout))
+    except:
+        logger.error("csv export failed")
         raise

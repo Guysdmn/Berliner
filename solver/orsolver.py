@@ -22,8 +22,8 @@ class OR_solver(object):
 
     def print_solution(self, manager, routing, assignment):
         """Prints assignment on console."""
-        print('OR solver solution:')
-        print('Objective: {} minutes'.format(assignment.ObjectiveValue()))
+        # print('OR solver solution:')
+        # print('Objective: {} minutes'.format(assignment.ObjectiveValue()))
         index = routing.Start(0)
         plan_output = 'Route for agent 0:\n'
         route_distance = 0
@@ -34,8 +34,9 @@ class OR_solver(object):
             index = assignment.Value(routing.NextVar(index))
             route_distance += routing.GetArcCostForVehicle(previous_index, index, 0)
         plan_output += ' {}'.format(manager.IndexToNode(index))
-        print(plan_output)
+        # print(plan_output)
         plan_output += 'Route duration: {}minutes\n'.format(route_distance)
+        self.or_perm = (self.or_perm, assignment.ObjectiveValue())
 
 
     def run(self):
