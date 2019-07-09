@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import os
 import sys
 import pandas as pd
 import numpy as np
@@ -13,7 +14,7 @@ import logging
 logger = logging.getLogger('root')
 
 from solver import orsolver, acosolver, orsolvertw
-
+from mapsplotlib import mapsplot as mplt
 
 """solve function
 
@@ -62,13 +63,23 @@ solver  =
 """
 def group_solver(df,groupBy,mode,disMat,builder,solver):
     try:
-        #
-        df[groupBy] = df[groupBy].astype(np.int64)
+        try:
+            with open('data/api_key.txt', mode='r') as f:
+                API_key = f.readline().strip()
+                mplt.register_api_key(API_key)
+                logger.info("Google static map API_KEY successfully registered")
+        except:
+            logger.error("Google API_KEY acquired failed")
+            raise
+        logger.info("-------------------Prepering dataframe for solution-------------------")
+        # cast groupBy column to int64 if groupBy is numeric
+        if np.issubdtype(df[groupBy].dtype, np.number):
+            df[groupBy] = df[groupBy].astype(np.int64)
+            logger.info("Clustering by numeric values")
+        
         # split data by groupBy into dictionary, key = groupBy column.
-        df = df.sort_values(by=[groupBy], ascending=True, na_position='first').dropna() # maybe unnessesery
-
+        # df = df.sort_values(by=[groupBy], ascending=True, na_position='first').dropna() # maybe unnessesery
         uniqueNames = df[groupBy].unique()
-
         logger.info("Total of {} different {}".format(len(uniqueNames),groupBy))
         dfDict = {value : pd.DataFrame for value in uniqueNames}
         for key in dfDict.keys():
@@ -78,7 +89,7 @@ def group_solver(df,groupBy,mode,disMat,builder,solver):
         # solve tsp for each group.
         for group, data in dfDict.items():
             logger.info('----------------------STARTING {} {}----------------------'.format(groupBy,group))
-            distance_mat = 'csv/{}_distance.csv'.format(group)
+            distance_mat = 'solution/{}_distance.csv'.format(group)
             n = data.shape[0]
             solution = (list(range(n)), 0)
 
@@ -104,8 +115,10 @@ def group_solver(df,groupBy,mode,disMat,builder,solver):
             else:
                 logger.info("Group contains less then three points...")
 
-            fname = 'csv/{}_solution.csv'.format(group)
+            fname = 'solution/{}_solution.csv'.format(group)
             csv_export(data=data,order=solution[0],fout=fname)
+            pname = 'solution/{}.png'.format(group)
+            heatmap_export(data=data,fout=pname)
 
         return start,solution
     except:
@@ -121,7 +134,7 @@ fout = output .csv distance matrix file.
 mode = 
 """
 def defult_solver(fin,fout,mode='walking'):
-    distance_mat = 'csv/distance_matrix.csv'
+    distance_mat = 'solution/distance_matrix.csv'
 
     # build distance matrix
     try:
@@ -177,15 +190,14 @@ def google_distance_builder(data,fout,mode):
     try:
         with open('data/api_key.txt', mode='r') as f:
             API_key = f.readline().strip()
-            logger.info("Google API_KEY successfully connected")
+            # Connect to googlemaps.
+            Gmaps = googlemaps.Client(key=API_key)
+            logger.info("Google distance matrix API_KEY successfully registered")
     except:
         logger.error("Google API_KEY failed")
         raise
 
     try:
-        # Connect to googlemaps.
-        Gmaps = googlemaps.Client(key=API_key)
-
         # Init distance matrix - will be used to store calculated distances and times.
         disMat   = pd.DataFrame(0,columns=data.name.unique(), index=data.name.unique())
         apiCalls = 0
@@ -372,3 +384,15 @@ def csv_export(data,order,fout):
     except:
         logger.error("csv export failed")
         raise
+
+
+"""
+
+"""
+def heatmap_export(data,fout):
+    try:
+        path = '/Users/Guy/Desktop/repos/Berliner/'
+        mplt.density_plot(data['latitude'], data['longitude'],toFile=os.path.join(path,fout))
+        logger.info("Heatmap saved to: {}".format(fout))
+    except:
+        logger.error("print heatmap failed")

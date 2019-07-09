@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
 import sys
 import numpy as np
 import pandas as pd
@@ -8,7 +9,7 @@ from data import core, log
 import time
 import logging
 
-from mapsplotlib import mapsplot as mplt
+# from mapsplotlib import mapsplot as mplt
 
 """ solve function
 Entry point to solution.
@@ -34,31 +35,31 @@ def solve(fin,fout,groupBy='defult',mode='walking',disMat=True,builder='geo',sol
         sys.exit()
     
     ### mplt test ###
-    try:
-        with open('data/api_key.txt', mode='r') as f:
-            API_key = f.readline().strip()
-            logger.info("Google API_KEY successfully connected")
-    except:
-        logger.error("Google API_KEY failed")
-        raise
-    mplt.register_api_key(API_key)
-    # df = df.loc[np.r_[0:11930],:]
+    # try:
+    #     with open('data/api_key.txt', mode='r') as f:
+    #         API_key = f.readline().strip()
+    #         mplt.register_api_key(API_key)
+    #         logger.info("Google API_KEY successfully registered")
+    # except:
+    #     logger.error("Google API_KEY acquired failed")
+    #     raise
+
     # df['color'] = 'black'
     # df['size'] = 'medium'
     # df['value'] = 3
-    # print(df)
-    # mplt.heatmap(df['latitude'], df['longitude'], df['value'])
-    # mplt.plot_markers(df)
-    # mplt.density_plot(df['latitude'], df['longitude'])
-    # mplt.polygons(df['latitude'], df['longitude'], df['postal_code'])
+    # path = '/Users/Guy/Desktop/repos/Berliner/solution'
+    # mplt.heatmap(df['latitude'], df['longitude'], df['value'],toFile=os.path.join(path,'1'))
+    # mplt.plot_markers(df,toFile=os.path.join(path,'2.jpeg'))
+    # mplt.density_plot(df['latitude'], df['longitude'],toFile=os.path.join(path,'3.jpeg'))
+    # mplt.polygons(df['latitude'], df['longitude'], df['postal_code'],toFile=os.path.join(path,'4.jpeg'))
+    # mplt.scatter(df['latitude'], df['longitude'], df['postal_code'],toFile=os.path.join(path,'5.jpeg'))
+    # mplt.polyline(df['latitude'], df['longitude'], closed=True,toFile=os.path.join(path,'6.jpeg'))
 
     try:
         if(groupBy == 'defult'):
             #
-            # df = pd.read_csv(fin) #,usecols = ['name','latitude','longitude'])
             core.defult_solver(fin,fout,mode=mode,disMat=disMat,solver=solver)
         else:
-            # df = pd.read_csv(fin) #,usecols = [groupBy,'name','latitude','longitude'])
             core.group_solver(df=df,groupBy=groupBy,mode=mode,disMat=disMat,builder=builder,solver=solver)
     except:
         logger.critical("ERROR: Solve aborted")

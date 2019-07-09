@@ -5,8 +5,10 @@
 .DS_Store
 # api key file
 data/api_key.txt
-# all created data
+# all stored data
 csv/*
+# all solutions
+solution/*
 # workspace
 berliner.code-workspace
 # log file
