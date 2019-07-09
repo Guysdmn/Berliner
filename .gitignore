@@ -1,6 +1,13 @@
 */__pycache__
  *.pyc
+
+# some osx shit
 .DS_Store
+# api key file
 data/api_key.txt
+# all created data
 csv/*
+# workspace
 berliner.code-workspace
+# log file
+log.txt

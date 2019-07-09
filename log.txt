@@ -1,20 +1,12 @@
-[DEBUG] >> Starting new HTTPS connection (1): maps.googleapis.com:443
-[DEBUG] >> https://maps.googleapis.com:443 "GET /maps/api/staticmap?center=52.52326,13.42235&zoom=13&scale=2&size=640x640&maptype=roadmap&format=png32&key=AIzaSyANRb6bccyxQp3VA-dFUSypjhfalJy-T_A HTTP/1.1" 200 958018
-[DEBUG] >> STREAM b'IHDR' 16 13
-[DEBUG] >> STREAM b'bKGD' 41 6
-[DEBUG] >> b'bKGD' 41 6 (unknown)
-[DEBUG] >> STREAM b'IDAT' 59 8192
-[DEBUG] >> findfont: Matching :family=sans-serif:style=normal:variant=normal:weight=normal:stretch=normal:size=10.0 to DejaVu Sans ('/Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSans.ttf') with score of 0.050000.
-[DEBUG] >> update_title_pos
-[DEBUG] >> update_title_pos
+[INFO] >> Google API_KEY successfully connected
 [INFO] >> Total of 194 different postal_code
-[INFO] >> ----------------------STARTING GROUP 10097.0----------------------
+[INFO] >> ----------------------STARTING postal_code 10097----------------------
 [INFO] >> Building geographical distance matrix...
 [INFO] >> Built distane matrix in: 0.00 minutes with geo_distance_builder
-[INFO] >> Distance saved to: csv/10097.0_distance.csv
+[INFO] >> Distance saved to: csv/10097_distance.csv
 [INFO] >> Group contains less then three points...
-[INFO] >> Solution saved to: csv/10097.0_solution.csv
-[INFO] >> ----------------------STARTING GROUP 10115.0----------------------
+[INFO] >> Solution saved to: csv/10097_solution.csv
+[INFO] >> ----------------------STARTING postal_code 10115----------------------
 [INFO] >> Building geographical distance matrix...
 [ERROR] >> Geo distance matrix failed
 [ERROR] >> Group solver failed

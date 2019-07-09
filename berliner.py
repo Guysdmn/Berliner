@@ -19,35 +19,46 @@ groupBy = split .csv to groups by groupBy factor. 'defult' for solve as one grou
 mode    = distance matrix calculation factor, mode: 'driving','walking,'bicycling'.
 disMat  = True: build new distance Matrixes, False: don't.
 builder = distance matrix builder to use: 'google' / 'geo' / 'random'.
-solver  = solver to use: 'or' / 'ortw' / 'aco'.
+solver  = solver to use: 'or' / 'ortw' / 'aco' / 'cmp'. 'cmp': compare between all solvers.
 """
 def solve(fin,fout,groupBy='defult',mode='walking',disMat=True,builder='geo',solver='or'):
     # logger setup.
     logger = log.setup_logger('root')
 
-    ### MAP DRAW TEST
-
-    mplt.register_api_key('AIzaSyANRb6bccyxQp3VA-dFUSypjhfalJy-T_A')
-    df = pd.read_csv(fin,usecols = ['name','latitude','longitude','postal_code'])
-    df.dropna()
-    df = df.loc[np.r_[500:520,1000:1020,1500:1520,2000:2020,2500:2520],:]
+    
+    try:
+        df = pd.read_csv(fin) #,usecols = ['name','latitude','longitude','postal_code'])
+        df = df.dropna()
+    except:
+        logger.error("{} not found".format(fin))
+        sys.exit()
+    
+    ### mplt test ###
+    try:
+        with open('data/api_key.txt', mode='r') as f:
+            API_key = f.readline().strip()
+            logger.info("Google API_KEY successfully connected")
+    except:
+        logger.error("Google API_KEY failed")
+        raise
+    mplt.register_api_key(API_key)
+    # df = df.loc[np.r_[0:11930],:]
     # df['color'] = 'black'
     # df['size'] = 'medium'
-    df['value'] = 3
+    # df['value'] = 3
     # print(df)
     # mplt.heatmap(df['latitude'], df['longitude'], df['value'])
     # mplt.plot_markers(df)
-    mplt.density_plot(df['latitude'], df['longitude'])
+    # mplt.density_plot(df['latitude'], df['longitude'])
     # mplt.polygons(df['latitude'], df['longitude'], df['postal_code'])
 
     try:
         if(groupBy == 'defult'):
             #
-            df = pd.read_csv(fin) #,usecols = ['name','latitude','longitude'])
+            # df = pd.read_csv(fin) #,usecols = ['name','latitude','longitude'])
             core.defult_solver(fin,fout,mode=mode,disMat=disMat,solver=solver)
         else:
-            #
-            df = pd.read_csv(fin) #,usecols = [groupBy,'name','latitude','longitude'])
+            # df = pd.read_csv(fin) #,usecols = [groupBy,'name','latitude','longitude'])
             core.group_solver(df=df,groupBy=groupBy,mode=mode,disMat=disMat,builder=builder,solver=solver)
     except:
         logger.critical("ERROR: Solve aborted")

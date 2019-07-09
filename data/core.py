@@ -1,3 +1,6 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 import sys
 import pandas as pd
 import numpy as np
@@ -14,8 +17,11 @@ from solver import orsolver, acosolver, orsolvertw
 
 """solve function
 
+params: 
+disMatName = 
+solver     =
 """
-def solve(disMatName,solver='or'):
+def explore(disMatName,solver='or'):
     # initialize solver by solver arg.
     if(solver=='or'):
         #
@@ -46,13 +52,23 @@ def solve(disMatName,solver='or'):
 
 """group_solver function
 
+params: 
+df      = 
+groupBy = 
+mode    = 
+disMat  = 
+builder = 
+solver  =
 """
 def group_solver(df,groupBy,mode,disMat,builder,solver):
     try:
+        #
+        df[groupBy] = df[groupBy].astype(np.int64)
         # split data by groupBy into dictionary, key = groupBy column.
         df = df.sort_values(by=[groupBy], ascending=True, na_position='first').dropna() # maybe unnessesery
-        
+
         uniqueNames = df[groupBy].unique()
+
         logger.info("Total of {} different {}".format(len(uniqueNames),groupBy))
         dfDict = {value : pd.DataFrame for value in uniqueNames}
         for key in dfDict.keys():
@@ -61,7 +77,7 @@ def group_solver(df,groupBy,mode,disMat,builder,solver):
         # build distance matrix for each group.
         # solve tsp for each group.
         for group, data in dfDict.items():
-            logger.info('----------------------STARTING GROUP {}----------------------'.format(group))
+            logger.info('----------------------STARTING {} {}----------------------'.format(groupBy,group))
             distance_mat = 'csv/{}_distance.csv'.format(group)
             n = data.shape[0]
             solution = (list(range(n)), 0)
@@ -72,13 +88,13 @@ def group_solver(df,groupBy,mode,disMat,builder,solver):
                     google_distance_builder(data=data,fout=distance_mat,mode=mode)
                 elif builder == 'geo':
                     geo_distance_builder(data=data,fout=distance_mat)
-                else:
+                else: # random builder
                     random_distance_builder(fout=distance_mat,nxn=n,min_value=5,max_value=100)
 
             # find solution only for groups bigger then 2
             if(n > 2):
                 logger.info("Searching for optimal route...")
-                start,solution = solve(distance_mat,solver)
+                start,solution = explore(distance_mat,solver)
                 end = time.time()
 
                 logger.info("{}.csv number of leads in {}: {}".format(group,groupBy,n))
@@ -99,6 +115,10 @@ def group_solver(df,groupBy,mode,disMat,builder,solver):
 
 """defult_solver function
 
+params: 
+fin  = 
+fout = output .csv distance matrix file.
+mode = 
 """
 def defult_solver(fin,fout,mode='walking'):
     distance_mat = 'csv/distance_matrix.csv'
@@ -235,8 +255,7 @@ ELLIPSOIDS = {'WGS-84':        (6378.137,    6356.7523142,  1 / 298.257223563),
               'Airy (1830)':   (6377.563396, 6356.256909,   1 / 299.3249646),
               'Intl 1924':     (6378.388,    6356.911946,   1 / 297.0),
               'Clarke (1880)': (6378.249145, 6356.51486955, 1 / 293.465),
-              'GRS-67':        (6378.1600,   6356.774719,   1 / 298.25),
-              }
+              'GRS-67':        (6378.1600,   6356.774719,   1 / 298.25),}
 WGS-84 ellipsoid model by default, which is the most globally accurate.
 see : https://geopy.readthedocs.io/en/stable/#module-geopy.distance
 params:
