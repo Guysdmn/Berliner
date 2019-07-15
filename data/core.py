@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import os
-import sys
+# import sys
+import pathlib
 import pandas as pd
 import numpy as np
 import googlemaps
@@ -16,25 +17,25 @@ logger = logging.getLogger('root')
 from solver import orsolver, acosolver, orsolvertw
 from mapsplotlib import mapsplot as mplt
 
-"""solve function
 
-params: 
-disMatName = 
-solver     =
-"""
 def explore(disMatName,solver='or'):
+    """ solve function
+
+    params: 
+    disMatName = 
+    solver     =
+    """
     # initialize solver by solver arg.
+    start = time.time()
     if(solver=='or'):
         #
         OR_solver = orsolver.OR_solver(distance_matrix=disMatName)
         #
-        start = time.time()
         perm  = OR_solver.run()   # OR_tools
     elif(solver=='ortw'):
         #
         OR_solvertw = orsolvertw.OR_solver_TW(fin=fout)
         #
-        start = time.time()
         perm  = OR_solvertw.run()   # OR_tools time windows
     elif (solver=='aco'):
         #
@@ -44,33 +45,29 @@ def explore(disMatName,solver='or'):
         #
         ACO_solver  = acosolver.ACO_solver(Graph=fd,seed=345)
         #
-        start = time.time()
         perm  = ACO_solver.run() # ACO
     else:
         raise
     
     return start, perm
 
-"""group_solver function
 
-params: 
-df      = 
-groupBy = 
-mode    = 
-disMat  = 
-builder = 
-solver  =
-"""
-def group_solver(df,groupBy,mode,disMat,builder,solver):
+def group_solver(df,groupBy,mode,disMat,builder,solver,plot):
+    """ group_solver function
+
+    params: 
+    df      = 
+    groupBy = 
+    mode    = 
+    disMat  = 
+    builder = 
+    solver  =
+    plot    =
+    """
     try:
-        try:
-            with open('data/api_key.txt', mode='r') as f:
-                API_key = f.readline().strip()
-                mplt.register_api_key(API_key)
-                logger.info("Google static map API_KEY successfully registered")
-        except:
-            logger.error("Google API_KEY acquired failed")
-            raise
+        if plot is True:
+            mapsplot_register()
+
         logger.info("-------------------Prepering dataframe for solution-------------------")
         # cast groupBy column to int64 if groupBy is numeric
         if np.issubdtype(df[groupBy].dtype, np.number):
@@ -90,25 +87,26 @@ def group_solver(df,groupBy,mode,disMat,builder,solver):
         for group, data in dfDict.items():
             logger.info('----------------------STARTING {} {}----------------------'.format(groupBy,group))
             distance_mat = 'solution/{}_distance.csv'.format(group)
-            n = data.shape[0]
-            solution = (list(range(n)), 0)
+            group_size   = data.shape[0]
+            solution     = (list(range(group_size)), 0)
 
             # build distance matrix for group if disMat=True
-            if disMat:
+            if disMat is True:
                 if builder == 'google':
                     google_distance_builder(data=data,fout=distance_mat,mode=mode)
                 elif builder == 'geo':
                     geo_distance_builder(data=data,fout=distance_mat)
                 else: # random builder
-                    random_distance_builder(fout=distance_mat,nxn=n,min_value=5,max_value=100)
+                    random_distance_builder(fout=distance_mat,nxn=group_size,min_value=5,max_value=100)
 
             # find solution only for groups bigger then 2
-            if(n > 2):
+            if(group_size > 2):
                 logger.info("Searching for optimal route...")
+                logger.info("{}.csv number of leads in {}: {}".format(group,groupBy,group_size))
+
                 start,solution = explore(distance_mat,solver)
                 end = time.time()
 
-                logger.info("{}.csv number of leads in {}: {}".format(group,groupBy,n))
                 logger.info("Order of {}:{}".format(mode,solution[0]))
                 logger.info("Objective: {}".format(solution[1]))
                 logger.info("{} solver timer: {:.2f} minutes".format(solver.upper(),(end-start)/60))
@@ -117,8 +115,8 @@ def group_solver(df,groupBy,mode,disMat,builder,solver):
 
             fname = 'solution/{}_solution.csv'.format(group)
             csv_export(data=data,order=solution[0],fout=fname)
-            pname = 'solution/{}.png'.format(group)
-            heatmap_export(data=data,fout=pname)
+            if plot is True:
+                mapsplot_export(data=data,fout=group,groupBy=groupBy)
 
         return start,solution
     except:
@@ -126,78 +124,64 @@ def group_solver(df,groupBy,mode,disMat,builder,solver):
         raise
 
 
-"""defult_solver function
+def defult_solver(df,mode,disMat,builder,solver,plot):
+    """ defult_solver function
 
-params: 
-fin  = 
-fout = output .csv distance matrix file.
-mode = 
-"""
-def defult_solver(fin,fout,mode='walking'):
-    distance_mat = 'solution/distance_matrix.csv'
+    params: 
+    fin  = 
+    mode = 
+    """
+    if plot is True:
+        mapsplot_register()
 
-    # build distance matrix
     try:
-        #google_distance_builder(data=data,fout=distance_mat,mode=mode)
-        geo_distance_builder(data=data,fout=distance_mat)
-        # random_distance_builder(fout=distance_mat,nxn=n,min_value=5,max_value=100)
-    except:
-        raise
-    
-    try:
-        logger.info('-----------------------START----------------------------')
-        disf = pd.DataFrame(pd.read_csv(distance_mat))
-        disf = disf.drop(disf.columns[[0]], axis=1)
-        fd   = disf.values.copy()
+        logger.info('----------------------STARTING----------------------')
+        # build distance matrix
+        # build distance matrix for group if disMat=True
+        if disMat is True:
+            distance_mat = 'solution/distance_matrix.csv'
+            if builder == 'google':
+                google_distance_builder(data=df,fout=distance_mat,mode=mode)
+            elif builder == 'geo':
+                geo_distance_builder(data=df,fout=distance_mat)
+            else: # random builder
+                random_distance_builder(fout=distance_mat,nxn=df.shape[0],min_value=5,max_value=100)
+
+        logger.info("Searching for optimal route...")
+        logger.info("number of leads in file: {}".format(df.shape[0]))
+
+        start,solution = explore(distance_mat,solver)
+        end = time.time()
+
+        logger.info("Order of {}:{}".format(mode,solution[0]))
+        logger.info("Objective: {}".format(solution[1]))
+        logger.info("{} solver timer: {:.2f} minutes".format(solver.upper(),(end-start)/60))
+
+        fname = 'solution/{}_solution.csv'.format("defult")
+        csv_export(data=df,order=solution[0],fout=fname)
         
-        # initialize solvers
-        # OR_solver   = orsolver.OR_solver(distance_matrix=distance_mat)
-        # #OR_solvertw = orsolvertw.OR_solver_TW(fin=fout)
-        # ACO_solver  = acosolver.ACO_solver(Graph=fd,seed=345)
-
-        # # solve
-        # start = time.time()
-        # or_perm = OR_solver.run()   # OR_tools
-        # end = time.time()
-        # print("OR solver timer: {:.2f}".format((end-start)/60), "minutes")
-        # print('---------------------------------------------------------')
-        # start = time.time()
-        # aco_perm = ACO_solver.run() # ACO
-        # end = time.time()
-        # print("ACO solver timer: {:.2f}".format((end-start)/60), "minutes")
-
-        # print('-----------------------FINNISH---------------------------')
+        if plot is True:
+            pname = 'defult'
+            mapsplot_export(data=df,fout=pname,groupBy=pname)
     except:
-        raise
-    try:
-        core.csv_export(fin=fin,order=or_perm,fout=fout)
-    except:
+        logger.error("Defult solver failed")
         raise
 
 
-""" google_distance_builder function
-building distance matrix using google distance matrix API, save matrix as fout.csv
-builder function should be call only ones for *.csv file (Google API $$$...)
-*** Google API key requiered ***
-params: 
-data = input data frame.
-fout = output .csv distance matrix file.
-"""
 def google_distance_builder(data,fout,mode):
-
-    logger.critical("Using google key for distance matrix")
-    # Google Maps API web service.
+    """ google_distance_builder function
+    building distance matrix using google distance matrix API, save matrix as fout.csv
+    builder function should be call only ones for *.csv file (Google API $$$...)
+    *** Google API key requiered ***
+    params: 
+    data = input data frame.
+    fout = output .csv distance matrix file.
+    """
     try:
-        with open('data/api_key.txt', mode='r') as f:
-            API_key = f.readline().strip()
-            # Connect to googlemaps.
-            Gmaps = googlemaps.Client(key=API_key)
-            logger.info("Google distance matrix API_KEY successfully registered")
-    except:
-        logger.error("Google API_KEY failed")
-        raise
+        logger.critical("Using google key for distance matrix")
+        # Google Maps API web service.
+        Gmaps = google_client_register()
 
-    try:
         # Init distance matrix - will be used to store calculated distances and times.
         disMat   = pd.DataFrame(0,columns=data.name.unique(), index=data.name.unique())
         apiCalls = 0
@@ -258,23 +242,23 @@ def google_distance_builder(data,fout,mode):
         raise
 
 
-""" geo_distance_builder for dev mode
-build  distance matrix using geopy distance calculator, save matrix as fout.csv
-distance calculator 
-              model             major (km)   minor (km)     flattening
-ELLIPSOIDS = {'WGS-84':        (6378.137,    6356.7523142,  1 / 298.257223563),
-              'GRS-80':        (6378.137,    6356.7523141,  1 / 298.257222101),
-              'Airy (1830)':   (6377.563396, 6356.256909,   1 / 299.3249646),
-              'Intl 1924':     (6378.388,    6356.911946,   1 / 297.0),
-              'Clarke (1880)': (6378.249145, 6356.51486955, 1 / 293.465),
-              'GRS-67':        (6378.1600,   6356.774719,   1 / 298.25),}
-WGS-84 ellipsoid model by default, which is the most globally accurate.
-see : https://geopy.readthedocs.io/en/stable/#module-geopy.distance
-params:
-data = input data frame.
-fout = output .csv distance matrix file.
-"""
 def geo_distance_builder(data,fout):
+    """ geo_distance_builder for dev mode
+    build  distance matrix using geopy distance calculator, save matrix as fout.csv
+    distance calculator 
+                model             major (km)   minor (km)     flattening
+    ELLIPSOIDS = {'WGS-84':        (6378.137,    6356.7523142,  1 / 298.257223563),
+                'GRS-80':        (6378.137,    6356.7523141,  1 / 298.257222101),
+                'Airy (1830)':   (6377.563396, 6356.256909,   1 / 299.3249646),
+                'Intl 1924':     (6378.388,    6356.911946,   1 / 297.0),
+                'Clarke (1880)': (6378.249145, 6356.51486955, 1 / 293.465),
+                'GRS-67':        (6378.1600,   6356.774719,   1 / 298.25),}
+    WGS-84 ellipsoid model by default, which is the most globally accurate.
+    see : https://geopy.readthedocs.io/en/stable/#module-geopy.distance
+    params:
+    data = input data frame.
+    fout = output .csv distance matrix file.
+    """
     try: 
         logger.info("Building geographical distance matrix...")   
         # Init distance matrix - will be used to store calculated distances.
@@ -327,14 +311,6 @@ def geo_distance_builder(data,fout):
         raise
 
 
-""" random_distance_builder
-build random distance matrix size n X n with random leads name.
-params:
-fout      = output .csv distance matrix file.
-nxn       = size of matrix.
-min_value = minimum distance/duration value between leads.
-max_value = maximum distance/duration value between leads.
-"""
 def pd_fill_diagonal(df_matrix, value=0): 
     mat = df_matrix.values
     n = mat.shape[0]
@@ -342,6 +318,14 @@ def pd_fill_diagonal(df_matrix, value=0):
     return pd.DataFrame(mat)
 
 def random_distance_builder(fout, nxn, min_value=1, max_value=100):
+    """ random_distance_builder
+    build random distance matrix size n X n with random leads name.
+    params:
+    fout      = output .csv distance matrix file.
+    nxn       = size of matrix.
+    min_value = minimum distance/duration value between leads.
+    max_value = maximum distance/duration value between leads.
+    """
     try:
         # Create leads name.
         names = ['s' + str(x) for x in range(1,nxn+1)]
@@ -357,19 +341,20 @@ def random_distance_builder(fout, nxn, min_value=1, max_value=100):
         logger.error("Random distance matrix failed")
         raise
 
-""" csv_export function
-gets leads data from fin.csv, puts in fout.csv in order.
-params:
-fin   = input .csv file name, unordered. 
-order = new order permutation.
-fout  = output .csv file name, ordered by order arg. 
-"""
+
 def pairwise(iterable):
     a, b = tee(iterable)
     next(b, None)
     return zip(a, b)
 
 def csv_export(data,order,fout):
+    """ csv_export function
+    gets leads data from fin.csv, puts in fout.csv in order.
+    params:
+    fin   = input .csv file name, unordered. 
+    order = new order permutation.
+    fout  = output .csv file name, ordered by order arg. 
+    """
     try:
         # Create new data frame.
         orderd = pd.DataFrame(columns=list(data.columns))
@@ -386,13 +371,66 @@ def csv_export(data,order,fout):
         raise
 
 
-"""
+# mplt.heatmap(df['latitude'], df['longitude'], df['value'],toFile=os.path.join(path,'1'))
+# mplt.plot_markers(df,toFile=os.path.join(path,'2.jpeg'))
+# mplt.density_plot(df['latitude'], df['longitude'],toFile=os.path.join(path,'3.jpeg'))
+# mplt.polygons(df['latitude'], df['longitude'], df['postal_code'],toFile=os.path.join(path,'4.jpeg'))
+# mplt.scatter(df['latitude'], df['longitude'], df['postal_code'],toFile=os.path.join(path,'5.jpeg'))
+# mplt.polyline(df['latitude'], df['longitude'], closed=True,toFile=os.path.join(path,'6.jpeg'))
+def mapsplot_export(data,fout,groupBy):
+    """ mapsplot_export function
 
-"""
-def heatmap_export(data,fout):
+    params:
+    data    = dataframe of points.
+    fout    = name of export file.
+    groupBy = 
+    """
     try:
-        path = '/Users/Guy/Desktop/repos/Berliner/'
-        mplt.density_plot(data['latitude'], data['longitude'],toFile=os.path.join(path,fout))
-        logger.info("Heatmap saved to: {}".format(fout))
+        path      = pathlib.Path(__file__).parent.parent  
+        if groupBy == 'defult':
+            # plot heat map on map
+            file_name = 'solution/{}_density.png'.format(fout)
+            mplt.density_plot(data['latitude'], data['longitude'],toFile=os.path.join(path,file_name))
+        else:
+            # plot covered area on map
+            file_name = 'solution/{}_cover.png'.format(fout)
+            mplt.polygons(data['latitude'], data['longitude'],data[groupBy],toFile=os.path.join(path,file_name))
+        
+        logger.info("mapsplot saved to: {}".format(file_name))
     except:
-        logger.error("print heatmap failed")
+        logger.error("mapsplot export failed")
+
+
+
+def google_client_register():
+    """ google_client_register function
+    Google Client API key to enable Google Distance Matrix calls.
+    return:
+    Gmaps = 
+    """
+    try:
+        with open('data/api_key.txt', mode='r') as f:
+            API_key = f.readline().strip()
+            # Connect to googlemaps.
+            Gmaps = googlemaps.Client(key=API_key)
+            logger.info("Google distance matrix API_KEY successfully registered")
+    except:
+        logger.error("Google client register API_KEY failed")
+        raise
+    
+    return Gmaps
+
+
+
+def mapsplot_register():
+    """ mapsplot_register function
+    mapsplotlib Google Static Maps API key to enable queries to Google.
+    """
+    try:
+        with open('data/api_key.txt', mode='r') as f:
+            API_key = f.readline().strip()
+            mplt.register_api_key(API_key)
+            logger.info("Google static map API_KEY successfully registered")
+    except:
+        logger.error("mplt.register API_KEY failed")
+        raise
