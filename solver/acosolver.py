@@ -1,6 +1,9 @@
 import numpy as np
 import sys
 from collections import OrderedDict
+import logging
+
+logger = logging.getLogger('root')
 
 """
 A class for defining an Ant Colony Optimizer for TSP-solving.
@@ -33,28 +36,33 @@ class ACO_solver(object) :
     Notably, every individual 'path' is a list of edges, each represented by a pair of nodes.
     """
     def run(self) :
-        #Book-keeping: best tour ever
-        shortest_path = None
-        # break condition
-        stop = 0
-        best_path = ("TBD", np.inf)
+        try:
+            #Book-keeping: best tour ever
+            shortest_path = None
+            # break condition
+            stop = 0
+            best_path = ("TBD", np.inf)
 
-        for i in range(self.Niter):
-            all_paths = self.constructColonyPaths()
-            self.depositPheronomes(all_paths)
-            shortest_path = min(all_paths, key=lambda x: x[1])
-            if shortest_path[1] < best_path[1]:
-                best_path = shortest_path 
-                stop = 0
-            stop += 1
-            if stop == 15:
-                break           
-            self.pheromone * self.rho  #evaporation
-        
-        # print solution
-        # self.print_solution(best_path)
+            for i in range(self.Niter):
+                all_paths = self.constructColonyPaths()
+                self.depositPheronomes(all_paths)
+                shortest_path = min(all_paths, key=lambda x: x[1])
+                if shortest_path[1] < best_path[1]:
+                    best_path = shortest_path 
+                    stop = 0
+                stop += 1
+                if stop == 15:
+                    break           
+                self.pheromone * self.rho  #evaporation
+            
+            # print solution
+            # self.print_solution(best_path)
 
-        return best_path
+            best_path = [i[0] for i in best_path[0]],best_path[1]
+            return best_path
+        except:
+            logger.error("ACO solver failed")
+            raise
 
     """
     Prints solution on console.
@@ -131,7 +139,7 @@ class ACO_solver(object) :
     'visited' is a set of nodes - whose probability weights are constructed as zeros, to eliminate revisits.
     The random generation relies on norm_row, as a vector of probabilities, using the numpy function 'choice'
     """
-    def nextMove(self, pheromone, dist, visited) :
+    def nextMove(self, pheromone, dist, visited):
         pheromone = np.copy(pheromone)
         pheromone[list(visited)] = 0
         row = pheromone ** self.alpha * (( 1.0 / dist) ** self.beta)

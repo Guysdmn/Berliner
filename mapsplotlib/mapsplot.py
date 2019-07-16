@@ -119,7 +119,7 @@ def plot_markers(markers, maptype=MAPTYPE, toFile=""):
     # Checking NaN input
     nans = (markers.latitude.isnull() | markers.longitude.isnull())
     if nans.sum() > 0:
-        warnings.warn('Ignoring {} example(s) containing NaN latitude or longitude.'.format(nans.sum()))
+        warnings.warn(' >> Ignoring {} example(s) containing NaN latitude or longitude.'.format(nans.sum()))
     # Querying map
     img = GoogleStaticMapsAPI.map(
         scale=SCALE,
@@ -232,7 +232,7 @@ def polygons(latitudes, longitudes, clusters, maptype=MAPTYPE, alpha=0.25, toFil
     for c in unique_clusters:
         in_polygon = clusters == c
         if in_polygon.sum() < 3:
-            print('[WARN] Cannot draw polygon for cluster {} - only {} samples.'.format(c, in_polygon.sum()))
+            print('[WARN] >> Cannot draw polygon for cluster {} - only {} samples.'.format(c, in_polygon.sum()))
             continue
         cluster_pixels = pixels.loc[clusters == c]
         polygon_list.append(Polygon(cluster_pixels.iloc[ConvexHull(cluster_pixels).vertices], closed=True))

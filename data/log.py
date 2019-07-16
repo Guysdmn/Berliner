@@ -4,7 +4,12 @@
 import logging
 import logging.handlers
 
-def setup_logger(name,console=True):
+def setup_logger(name,console):
+    """ setup_logger function
+
+    :param string name     : name of logger to be referenced from any file
+    :param boolean console : print log to console or not
+    """
     # logger settings
     log_file = "log.txt"
     log_format = "[%(levelname)s] >> %(message)s"
