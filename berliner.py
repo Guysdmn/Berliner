@@ -27,7 +27,6 @@ def solve(fin,groupBy="",mode="walking",disMat=True,builder="geo",solver="or",pl
     try:
         df = pd.read_csv(fin)
         df = df.dropna()
-        df = df[1:500]
     except:
         logger.error("{} not found".format(fin))
         sys.exit()
@@ -48,7 +47,7 @@ if __name__ == "__main__":
     
     fin     = sys.argv[1] #'csv/*.csv'
     groupBy = 'postal_code'
-    solver  = 'aco'
+    solver  = 'or'
     builder = 'geo'
     disMat  = True
     mode    = 'walking'
