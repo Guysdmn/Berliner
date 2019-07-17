@@ -2,7 +2,9 @@ from __future__ import print_function
 from ortools.constraint_solver import routing_enums_pb2
 from ortools.constraint_solver import pywrapcp
 import pandas as pd
+import logging
 
+logger = logging.getLogger('root')
 
 class OR_solver(object):
     def __init__(self,distance_matrix):
@@ -61,8 +63,7 @@ class OR_solver(object):
 
         # Setting first solution heuristic.
         search_parameters = pywrapcp.DefaultRoutingSearchParameters()
-        search_parameters.first_solution_strategy = (
-            routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC)
+        search_parameters.first_solution_strategy = (routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC)
 
         # Solve the problem.
         assignment = routing.SolveWithParameters(search_parameters)
@@ -71,7 +72,8 @@ class OR_solver(object):
         if assignment:
             self.print_solution(manager, routing, assignment)
         else:
-            print("no solution")
+            logger.error("OR solver failed to find silution")
+            raise
         return self.or_perm
 
 
